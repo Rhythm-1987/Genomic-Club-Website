@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Genomics Club — Marwadi University</title>
+  <meta name="description" content="Explore genomic technologies shaping biomedical research. Join the Genomics Club at Marwadi University.">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='none' stroke='%2300e882' stroke-width='6'/><path d='M30 35 Q50 20 70 35 Q50 50 30 65 Q50 80 70 65' fill='none' stroke='%2300e882' stroke-width='5'/></svg>">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Syne','sans-serif'],
+            body:    ['Outfit','sans-serif'],
+            mono:    ['"JetBrains Mono"','monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- CSS files (inline here since CDN build; in Vite these are imports) -->
+  <style>
+    /* ── variables.css ── */
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --bg:         #f0fff8;
+      --bg2:        #f0fff8;
+      --card:       rgba(255,255,255,0.55);
+      --card-hov:   rgba(255,255,255,0.82);
+      --border:     rgba(0,180,100,0.2);
+      --border-hov: rgba(0,180,100,0.55);
+      --tx:         #011a0c;
+      --tx-m:       #2e6b45;
+      --accent:     #00b864;
+      --accent2:    #009950;
+      --glow:       rgba(0,184,100,0.22);
+      --blur:       22px;
+      --sh:         0 8px 36px rgba(0,184,100,0.10);
+      --sh-hov:     0 22px 64px rgba(0,184,100,0.22);
+    }
+    .dark {
+      --bg:         #020e07;
+      --bg2:        #020e07;
+      --card:       rgba(3,18,10,0.62);
+      --card-hov:   rgba(5,26,14,0.88);
+      --border:     rgba(0,232,130,0.14);
+      --border-hov: rgba(0,232,130,0.48);
+      --tx:         #e4fff1;
+      --tx-m:       #5aaa7a;
+      --accent:     #00e882;
+      --accent2:    #00c46e;
+      --glow:       rgba(0,232,130,0.18);
+      --sh:         0 8px 36px rgba(0,0,0,0.55);
+      --sh-hov:     0 22px 64px rgba(0,232,130,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--tx);
+      transition: background .45s, color .45s;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 99px; }
+    ::selection { background: rgba(0,232,130,0.25); color: var(--tx); }
+
+    /* ── components.css ── */
+    .glass {
+      background: var(--card);
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
+      border: 1px solid var(--border);
+      box-shadow: var(--sh);
+      transition: background .3s, border-color .3s, box-shadow .3s, transform .3s;
+    }
+    .glass:hover {
+      background: var(--card-hov);
+      border-color: var(--border-hov);
+      box-shadow: var(--sh-hov);
+    }
+    .glass-nav {
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+    }
+    .dark .glass-nav { background: rgba(2,12,6,0.82); }
+
+    /* Nav link with scroll-spy underline */
+    .nav-link {
+      position: relative; color: var(--tx-m); text-decoration: none;
+      font-weight: 500; font-size: .875rem; transition: color .2s; padding-bottom: 2px;
+    }
+    .nav-link::after {
+      content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+      width: 0; height: 2px; background: var(--accent); border-radius: 99px;
+      transition: width .3s cubic-bezier(.4,0,.2,1);
+    }
+    .nav-link:hover, .nav-link.active { color: var(--accent); }
+    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+
+    /* Buttons */
+    .btn-p {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--accent); color: #001f0e;
+      padding: .72rem 1.7rem; border-radius: 12px;
+      font-family: 'Syne',sans-serif; font-weight: 700; font-size: .9rem;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: transform .22s, box-shadow .22s;
+      position: relative; overflow: hidden;
+    }
+    .btn-p::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.25), transparent);
+      opacity: 0; transition: opacity .22s;
+    }
+    .btn-p:hover { transform: translateY(-3px); box-shadow: 0 10px 35px var(--glow); }
+    .btn-p:hover::after { opacity: 1; }
+    .btn-p:active { transform: translateY(0); }
+
+    .btn-g {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: transparent; color: var(--tx);
+      padding: .72rem 1.7rem; border-radius: 12px;
+      border: 1px solid var(--border);
+      font-family: 'Syne',sans-serif; font-weight: 600; font-size: .9rem;
+      text-decoration: none; cursor: pointer; transition: all .22s;
+    }
+    .btn-g:hover {
+      border-color: var(--accent); color: var(--accent);
+      box-shadow: 0 0 22px var(--glow); transform: translateY(-2px);
+    }
+
+    /* Section tag */
+    .stag {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'JetBrains Mono',monospace;
+      font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
+      font-weight: 600; color: var(--accent);
+    }
+    .stag::before { content:''; width:22px; height:2px; background:var(--accent); border-radius:99px; }
+
+    /* Gradient text */
+    .gtext {
+      background: linear-gradient(135deg, var(--accent) 0%, #00ffaa 55%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* Theme toggle */
+    .t-toggle {
+      width:52px; height:28px; border-radius:99px;
+      background:var(--card); border:1px solid var(--border-hov);
+      cursor:pointer; position:relative; transition:background .3s; flex-shrink:0;
+    }
+    .t-toggle::after {
+      content:'☀️'; position:absolute; width:22px; height:22px; top:3px; left:3px;
+      display:flex; align-items:center; justify-content:center; font-size:.7rem; line-height:1;
+      transition:transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .dark .t-toggle::after { content:'🌙'; transform:translateX(24px); }
+
+    /* Avatar */
+    .avatar {
+      width:68px; height:68px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800;
+      color:#001f0e; margin:0 auto .9rem; border:2px solid var(--border);
+      transition:border-color .3s, box-shadow .3s;
+    }
+    .glass:hover .avatar { border-color:var(--accent); box-shadow:0 0 18px var(--glow); }
+
+    /* Misc */
+    .price-glow { filter: drop-shadow(0 0 18px var(--glow)); }
+    .sdiv { width:100%; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
+    .stat-n { font-family:'Syne',sans-serif; font-size:2.8rem; font-weight:800; color:var(--accent); line-height:1; }
+    .act-n { position:absolute; top:.8rem; right:1rem; font-family:'Syne',sans-serif; font-size:3.8rem; font-weight:800; opacity:.08; line-height:1; color:var(--accent); pointer-events:none; }
+    .tilt-card { transform-style:preserve-3d; perspective:800px; }
+
+    /* Reveal states */
+    .rv-up    { opacity:0; transform:translateY(50px); }
+    .rv-left  { opacity:0; transform:translateX(-55px); }
+    .rv-right { opacity:0; transform:translateX(55px); }
+    .rv-scale { opacity:0; transform:scale(.86); }
+
+    /* Cursor glow */
+    #cursor-glow {
+      position:fixed; pointer-events:none; z-index:9998;
+      width:350px; height:350px; border-radius:50%;
+      background:radial-gradient(circle,rgba(0,196,110,.055) 0%,transparent 70%);
+      transform:translate(-50%,-50%); top:0; left:0;
+    }
+
+    /* Orb */
+    .orb {
+      position:absolute; border-radius:50%; pointer-events:none;
+      background:radial-gradient(circle,rgba(0,196,110,.13) 0%,transparent 70%);
+      filter:blur(40px);
+    }
+
+    /* Mesh */
+    .mesh {
+      background-image:
+        radial-gradient(ellipse 70% 50% at 15% 25%,rgba(0,196,110,.07) 0%,transparent 65%),
+        radial-gradient(ellipse 55% 40% at 85% 75%,rgba(0,255,155,.05) 0%,transparent 60%),
+        radial-gradient(ellipse 35% 55% at 55% 10%,rgba(0,155,80,.04) 0%,transparent 50%);
+    }
+    .dark .mesh {
+      background-image:
+        radial-gradient(ellipse 70% 50% at 15% 25%,rgba(0,196,110,.11) 0%,transparent 65%),
+        radial-gradient(ellipse 55% 40% at 85% 75%,rgba(0,255,155,.07) 0%,transparent 60%),
+        radial-gradient(ellipse 35% 55% at 55% 10%,rgba(0,155,80,.06) 0%,transparent 50%);
+    }
+
+    /* Back to top */
+    #btt { opacity:0; pointer-events:none; transition:opacity .3s; }
+    #btt.show { opacity:1; pointer-events:auto; }
+
+    /* Card lift */
+    .card-lift { transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,border-color .3s; }
+    .card-lift:hover { transform:translateY(-5px) scale(1.01); }
+
+    /* check items */
+    .check-item { display:flex; align-items:center; gap:.75rem; font-size:.875rem; color:var(--tx-m); }
+    .check-dot { width:20px; height:20px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:700; background:var(--glow); color:var(--accent); border:1px solid var(--border); }
+
+    /* ── animations.css ── */
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
+    .float { animation:float 6s ease-in-out infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+    .bounce { animation:bounce 2s ease-in-out infinite; }
+
+    /* ── Icon size in activity cards ── */
+    .icon-wrap svg { width:22px; height:22px; }
+
+    /* ── Who we are section bigger ── */
+    #about .about-heading {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+    }
+    #about .about-body {
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body class="mesh min-h-screen">
+
+  <!-- CURSOR GLOW -->
+  <div id="cursor-glow"></div>
+  <!-- PARTICLE CANVAS -->
+  <canvas id="pc" style="position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.28;"></canvas>
+
+  <!-- ══════════════════════════════════════════
+       NAVBAR  (centered links)
+  ══════════════════════════════════════════ -->
+  <nav id="navbar" class="glass-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-5 md:px-8 py-3.5 flex items-center justify-between gap-4">
+
+      <!-- Logo -->
+      <a href="#home" class="flex items-center gap-2.5 shrink-0">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+             style="background:var(--accent);color:#001f0e;">
+          <!-- DNA icon SVG -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M4 3c0 0 5 2 8 5s8 5 8 8"/>
+            <path d="M20 3c0 0-5 2-8 5s-8 5-8 8"/>
+            <path d="M4 21c0 0 2-2 4-2s4 2 4 2 2-2 4-2 4 2 4 2"/>
+            <path d="M4 3c0 0 2 2 4 2s4-2 4-2 2 2 4 2 4-2 4-2"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:.92rem;color:var(--tx);line-height:1.15;">
+            Genomics Club
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tx-m);">
+            Marwadi University
+          </div>
+        </div>
+      </a>
+
+      <!-- Centered nav links -->
+      <ul class="hidden md:flex items-center gap-6 list-none absolute left-1/2 -translate-x-1/2">
+        <li><a href="#home"       class="nav-link" data-section="home">Home</a></li>
+        <li><a href="#about"      class="nav-link" data-section="about">About</a></li>
+        <li><a href="#science"    class="nav-link" data-section="science">Genomics</a></li>
+        <li><a href="#activities" class="nav-link" data-section="activities">Activities</a></li>
+        <li><a href="#benefits"   class="nav-link" data-section="benefits">Benefits</a></li>
+        <li><a href="#team"       class="nav-link" data-section="team">Team</a></li>
+        <li><a href="#join"       class="nav-link" data-section="join">Membership</a></li>
+      </ul>
+
+      <!-- Right controls -->
+      <div class="flex items-center gap-3">
+        <button id="tt" class="t-toggle" aria-label="Toggle theme"></button>
+        <a href="#join" class="btn-p hidden sm:inline-flex text-sm px-4 py-2">Join Us
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <button id="hb" class="md:hidden flex flex-col gap-1.5 p-2" aria-label="Menu">
+          <span class="w-5 h-0.5 rounded-full block" style="background:var(--tx);transition:all .3s;"></span>
+          <span class="w-5 h-0.5 rounded-full block" style="background:var(--tx);transition:all .3s;"></span>
+          <span class="w-3 h-0.5 rounded-full block" style="background:var(--accent);transition:all .3s;"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mm" class="hidden flex-col px-6 pb-5 gap-1 md:hidden">
+      <a href="#home"       class="nav-link py-2 block" data-section="home">Home</a>
+      <a href="#about"      class="nav-link py-2 block" data-section="about">About</a>
+      <a href="#science"    class="nav-link py-2 block" data-section="science">Genomics</a>
+      <a href="#activities" class="nav-link py-2 block" data-section="activities">Activities</a>
+      <a href="#benefits"   class="nav-link py-2 block" data-section="benefits">Benefits</a>
+      <a href="#team"       class="nav-link py-2 block" data-section="team">Team</a>
+      <a href="#join"       class="nav-link py-2 block" data-section="join">Membership</a>
+      <a href="#join" class="btn-p mt-3 justify-center text-sm">Join Us →</a>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════
+       HERO  (id="home" for Home nav link)
+  ══════════════════════════════════════════ -->
+  <section id="home" class="relative min-h-screen flex items-center overflow-hidden pt-20">
+    <canvas id="dna-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.4;"></canvas>
+    <div class="orb" style="width:500px;height:500px;top:5%;right:5%;"></div>
+    <div class="orb" style="width:300px;height:300px;bottom:10%;left:5%;opacity:.6;"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-5 md:px-8 py-24 grid lg:grid-cols-2 gap-14 items-center w-full">
+
+      <!-- Left content -->
+      <div>
+        <div class="stag mb-5 rv-up">Dept. of Bioinformatics · FET · Marwadi University</div>
+
+        <!-- ✅ CHANGE 3: Heading is "Genomics Club" -->
+        <h1 class="rv-up font-bold leading-[1.03] mb-6"
+            style="font-family:'Syne',sans-serif;font-size:clamp(3rem,8vw,6rem);color:var(--tx);">
+          Genomics<br><span class="gtext">Club</span>
+        </h1>
+
+        <p class="hero-sub rv-up text-lg leading-relaxed mb-8 max-w-xl" style="color:var(--tx-m);">
+          Empowering students to explore cutting-edge genomic technologies shaping biomedical
+          research and the future of medicine — at Marwadi University.
+        </p>
+
+        <div class="hero-btns rv-up flex flex-wrap gap-4 mb-14">
+          <a href="#join" class="btn-p">
+            Join the Club
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#activities" class="btn-g">
+            Explore Activities
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </a>
+        </div>
+
+        <!-- ✅ CHANGE 5: Removed "3.1 billion bases" and "23 pairs" stats — only activities & coordinators -->
+        <div class="rv-up flex flex-wrap gap-10">
+          <div>
+            <div class="stat-n" data-target="12">0</div>
+            <div class="text-xs mt-1 font-semibold uppercase tracking-widest" style="color:var(--tx-m);font-family:'JetBrains Mono',monospace;">Activities</div>
+          </div>
+          <div>
+            <div class="stat-n" data-target="6">0</div>
+            <div class="text-xs mt-1 font-semibold uppercase tracking-widest" style="color:var(--tx-m);font-family:'JetBrains Mono',monospace;">Coordinators</div>
+          </div>
+          <div>
+            <div class="stat-n" style="font-size:2rem;">₹100</div>
+            <div class="text-xs mt-1 font-semibold uppercase tracking-widest" style="color:var(--tx-m);font-family:'JetBrains Mono',monospace;">Membership</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right card -->
+      <div class="rv-right hidden lg:block">
+        <div class="glass rounded-3xl p-7" style="background:rgba(255,255,255,.22);border:1px solid rgba(0,196,110,.22);">
+          <div class="relative h-64 flex items-center justify-center mb-5">
+            <canvas id="hx" width="280" height="256"></canvas>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="glass rounded-2xl p-4 text-center tilt-card card-lift">
+              <div class="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style="background:var(--glow);color:var(--accent);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm9 11v-1a7 7 0 0 0-7-7h-4a7 7 0 0 0-7 7v1"/></svg>
+              </div>
+              <div class="text-xs font-bold tracking-widest uppercase" style="color:var(--accent);font-family:'JetBrains Mono',monospace;">Sequencing</div>
+              <div class="text-xs mt-0.5" style="color:var(--tx-m);">Next-Gen</div>
+            </div>
+            <div class="glass rounded-2xl p-4 text-center tilt-card card-lift">
+              <div class="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style="background:var(--glow);color:var(--accent);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </div>
+              <div class="text-xs font-bold tracking-widest uppercase" style="color:var(--accent);font-family:'JetBrains Mono',monospace;">CRISPR</div>
+              <div class="text-xs mt-0.5" style="color:var(--tx-m);">Gene Editing</div>
+            </div>
+            <div class="glass rounded-2xl p-4 text-center tilt-card card-lift">
+              <div class="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style="background:var(--glow);color:var(--accent);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
+              <div class="text-xs font-bold tracking-widest uppercase" style="color:var(--accent);font-family:'JetBrains Mono',monospace;">Medicine</div>
+              <div class="text-xs mt-0.5" style="color:var(--tx-m);">Personalized</div>
+            </div>
+            <div class="glass rounded-2xl p-4 text-center tilt-card card-lift">
+              <div class="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style="background:var(--glow);color:var(--accent);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              </div>
+              <div class="text-xs font-bold tracking-widest uppercase" style="color:var(--accent);font-family:'JetBrains Mono',monospace;">Bioinformatics</div>
+              <div class="text-xs mt-0.5" style="color:var(--tx-m);">Computational</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 bounce z-10">
+      <span class="text-xs font-medium" style="color:var(--tx-m);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;">SCROLL</span>
+      <div class="w-px h-8" style="background:linear-gradient(to bottom,var(--accent),transparent);"></div>
+    </div>
+  </section>
+
+  <!-- ── Section divider ── -->
+  <div class="sdiv"></div>
+
+  <!-- ══════════════════════════════════════════
+       ABOUT  — "Who We Are" (bigger text)
+  ══════════════════════════════════════════ -->
+  <section id="about" class="py-28 px-5 md:px-8" style="background:var(--bg);">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-start">
+
+      <!-- Left -->
+      <div>
+        <div class="stag mb-4 rv-up">Who We Are</div>
+        <!-- ✅ CHANGE 8: bigger heading + body text -->
+        <h2 class="about-heading rv-up font-bold mb-5 leading-tight"
+            style="font-family:'Syne',sans-serif;font-size:clamp(2.4rem,5vw,3.8rem);color:var(--tx);">
+          Vision &amp; Mission
+        </h2>
+        <p class="about-body rv-up leading-relaxed mb-10"
+           style="color:var(--tx-m);font-size:1.05rem;line-height:1.8;max-width:480px;">
+          A community of curious minds at Marwadi University exploring the frontiers of genomics,
+          bioinformatics, and molecular biology. We connect students with the science shaping tomorrow's healthcare.
+        </p>
+
+        <!-- Coordinator card -->
+        <div class="glass rounded-2xl p-6 rv-up tilt-card card-lift">
+          <div class="flex items-start gap-4">
+            <div class="avatar shrink-0" style="width:60px;height:60px;font-size:1.1rem;margin:0;background:linear-gradient(135deg,var(--accent),var(--accent2));">AS</div>
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--tx);">Dr. Aditya Saxena</div>
+              <div class="text-xs font-bold tracking-widest uppercase mb-3"
+                   style="color:var(--accent);font-family:'JetBrains Mono',monospace;">Club Coordinator · Assoc. Professor</div>
+              <div class="text-sm space-y-1.5" style="color:var(--tx-m);">
+                <div class="flex items-center gap-2">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  Cabin MA557 · Ext: 1568
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <a href="mailto:aditya.saxena@marwadieducation.edu.in"
+                     style="color:var(--accent);" class="hover:underline">
+                    aditya.saxena@marwadieducation.edu.in
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="space-y-5">
+        <div class="glass rounded-2xl p-6 rv-right tilt-card card-lift">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--glow);border:1px solid var(--border);color:var(--accent);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <h3 style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Vision</h3>
+          </div>
+          <p class="text-sm leading-relaxed" style="color:var(--tx-m);">
+            To enable students to explore the latest genomic technologies shaping biomedical research and applications,
+            driving innovation in healthcare and life sciences.
+          </p>
+        </div>
+
+        <div class="glass rounded-2xl p-6 rv-right tilt-card card-lift" style="transition-delay:.1s">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--glow);border:1px solid var(--border);color:var(--accent);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3 style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Mission</h3>
+          </div>
+          <ul class="space-y-3">
+            <li class="flex items-start gap-3 text-sm" style="color:var(--tx-m);">
+              <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">▸</span>
+              Organize seminars, workshops, quizzes, games, and recreational activities focused on Genomics technologies.
+            </li>
+            <li class="flex items-start gap-3 text-sm" style="color:var(--tx-m);">
+              <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">▸</span>
+              Foster curiosity and encourage exploration of the latest advancements in genomic science.
+            </li>
+            <li class="flex items-start gap-3 text-sm" style="color:var(--tx-m);">
+              <span style="color:var(--accent);flex-shrink:0;margin-top:2px;">▸</span>
+              Share relevant knowledge and skills for professional success through organized events.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sdiv"></div>
+
+  <!-- ══════════════════════════════════════════
+       WHAT IS GENOMICS
+  ══════════════════════════════════════════ -->
+  <section id="science" class="py-28 px-5 md:px-8" style="background:var(--bg);">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <div class="stag mb-4 rv-up justify-center">The Science</div>
+        <h2 class="rv-up font-bold mb-4 leading-tight"
+            style="font-family:'Syne',sans-serif;font-size:clamp(1.9rem,3.8vw,3rem);color:var(--tx);">
+          What is <span class="gtext">Genomics?</span>
+        </h2>
+        <p class="rv-up text-base leading-relaxed" style="color:var(--tx-m);">
+          An interdisciplinary branch of molecular biology concerned with the structure, function, evolution, and mapping of genomes.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="glass rounded-2xl p-7 rv-scale tilt-card card-lift">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background:var(--glow);border:1px solid var(--border);color:var(--accent);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <div style="height:3px;width:36px;background:var(--accent);border-radius:99px;margin-bottom:1rem;"></div>
+          <h3 class="font-bold text-lg mb-3" style="font-family:'Syne',sans-serif;color:var(--tx);">The Genome</h3>
+          <p class="text-sm leading-relaxed" style="color:var(--tx-m);">
+            The genome is the entire set of genetic instructions in a cell — a complete blueprint containing all the information needed to build and run a living organism.
+          </p>
+        </div>
+        <div class="glass rounded-2xl p-7 rv-scale tilt-card card-lift" style="transition-delay:.1s">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background:var(--glow);border:1px solid var(--border);color:var(--accent);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div style="height:3px;width:36px;background:var(--accent);border-radius:99px;margin-bottom:1rem;"></div>
+          <h3 class="font-bold text-lg mb-3" style="font-family:'Syne',sans-serif;color:var(--tx);">Healthcare Impact</h3>
+          <p class="text-sm leading-relaxed" style="color:var(--tx-m);">
+            Genomics-based healthcare uses individual genomic information for clinical decisions — enabling precise diagnostic and therapeutic interventions that transform patient outcomes.
+          </p>
+        </div>
+        <div class="glass rounded-2xl p-7 rv-scale tilt-card card-lift" style="transition-delay:.2s">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style="background:var(--glow);border:1px solid var(--border);color:var(--accent);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="12" rx="10" ry="4"/><path d="M2 12c0 4.418 4.477 8 10 8s10-3.582 10-8"/><path d="M2 12c0-4.418 4.477-8 10-8s10 3.582 10 8"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+          </div>
+          <div style="height:3px;width:36px;background:var(--accent);border-radius:99px;margin-bottom:1rem;"></div>
+          <h3 class="font-bold text-lg mb-3" style="font-family:'Syne',sans-serif;color:var(--tx);">Global Potential</h3>
+          <p class="text-sm leading-relaxed" style="color:var(--tx-m);">
+            Genomics can reduce global health inequalities by providing developing nations with efficient, cost-effective tools for preventing and treating major diseases.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="sdiv"></div>
+
+  <!-- ══════════════════════════════════════════
+       ACTIVITIES
+  ══════════════════════════════════════════ -->
+  <section id="activities" class="py-28 px-5 md:px-8" style="background:var(--bg);">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <div class="stag mb-4 rv-up justify-center">What We Do</div>
+        <h2 class="rv-up font-bold mb-4 leading-tight"
+            style="font-family:'Syne',sans-serif;font-size:clamp(1.9rem,3.8vw,3rem);color:var(--tx);">
+          Club <span class="gtext">Activities</span>
+        </h2>
+        <p class="rv-up text-base" style="color:var(--tx-m);">
+          Twelve curated activities designed to build knowledge, skills, and connections in genomics.
+        </p>
+      </div>
+      <div id="act-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+    </div>
+  </section>
+
+  <div class="sdiv"></div>
+
+  <!-- ══════════════════════════════════════════
+       BENEFITS
+  ══════════════════════════════════════════ -->
+  <section id="benefits" class="py-28 px-5 md:px-8" style="background:var(--bg);">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <div class="stag mb-4 rv-up justify-center">Why Join</div>
+        <h2 class="rv-up font-bold mb-4 leading-tight"
+            style="font-family:'Syne',sans-serif;font-size:clamp(1.9rem,3.8vw,3rem);color:var(--tx);">
+          Benefits to <span class="gtext">Students</span>
+        </h2>
+      </div>
+      <div id="ben-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+  </section>
+
+  <div class="sdiv"></div>
+
+  <!-- ══════════════════════════════════════════
+       TEAM
+  ══════════════════════════════════════════ -->
+  <section id="team" class="py-28 px-5 md:px-8" style="background:var(--bg);">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <div class="stag mb-4 rv-up justify-center">Our People</div>
+        <h2 class="rv-up font-bold mb-4 leading-tight"
+            style="font-family:'Syne',sans-serif;font-size:clamp(1.9rem,3.8vw,3rem);color:var(--tx);">
+          Meet the <span class="gtext">Team</span>
+        </h2>
+        <p class="rv-up text-base" style="color:var(--tx-m);">
+          Student coordinators driving the Genomics Club's vision and activities.
+        </p>
+      </div>
+      <div id="team-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5"></div>
+    </div>
+  </section>
+
+  <div class="sdiv"></div>
+
+  <!-- ══════════════════════════════════════════
+       MEMBERSHIP
+  ══════════════════════════════════════════ -->
+  <section id="join" class="py-28 px-5 md:px-8" style="background:var(--bg);">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <div class="stag mb-4 rv-up justify-center">Get Involved</div>
+        <h2 class="rv-up font-bold mb-4 leading-tight"
+            style="font-family:'Syne',sans-serif;font-size:clamp(1.9rem,3.8vw,3rem);color:var(--tx);">
+          Join the <span class="gtext">Genomics Club</span>
+        </h2>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-10 items-start">
+        <!-- Steps -->
+        <div class="rv-left space-y-4">
+          <h3 class="font-bold text-xl mb-5" style="font-family:'Syne',sans-serif;color:var(--tx);">How to Join</h3>
+          <div class="flex gap-4 glass rounded-2xl p-5 tilt-card card-lift">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0"
+                 style="background:var(--accent);color:#001f0e;font-family:'Syne',sans-serif;">1</div>
+            <div>
+              <div class="font-semibold mb-1" style="color:var(--tx);">Login to MU Portal</div>
+              <div class="text-sm" style="color:var(--tx-m);">Access the Marwadi University student portal with your credentials.</div>
+            </div>
+          </div>
+          <div class="flex gap-4 glass rounded-2xl p-5 tilt-card card-lift">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0"
+                 style="background:var(--accent);color:#001f0e;font-family:'Syne',sans-serif;">2</div>
+            <div>
+              <div class="font-semibold mb-1" style="color:var(--tx);">Register for Genomics Club</div>
+              <div class="text-sm" style="color:var(--tx-m);">Find and register for the Genomics Club listing in the portal.</div>
+            </div>
+          </div>
+          <div class="flex gap-4 glass rounded-2xl p-5 tilt-card card-lift">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0"
+                 style="background:var(--accent);color:#001f0e;font-family:'Syne',sans-serif;">3</div>
+            <div>
+              <div class="font-semibold mb-1" style="color:var(--tx);">Submit Membership Fee</div>
+              <div class="text-sm" style="color:var(--tx-m);">Pay ₹100 in person at Cabin MA557, Dept. of Bioinformatics.</div>
+            </div>
+          </div>
+
+          <!-- MU Portal link button -->
+          <a href="https://login.marwadiuniversity.ac.in" target="_blank" rel="noopener" class="btn-p mt-4 w-full justify-center">
+            Go to MU Portal
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <!-- Card -->
+        <div class="rv-right">
+          <div class="glass rounded-3xl p-8 relative overflow-hidden text-center">
+            <div class="absolute -top-16 -right-16 w-52 h-52 rounded-full pointer-events-none"
+                 style="background:radial-gradient(circle,var(--glow),transparent 70%);"></div>
+            <div class="stag justify-center mb-3">Annual Membership</div>
+            <div class="price-glow mb-1">
+              <span style="font-family:'Syne',sans-serif;font-size:3.8rem;font-weight:800;color:var(--accent);">₹100</span>
+            </div>
+            <p class="text-sm mb-7" style="color:var(--tx-m);">One-time fee · Students &amp; Faculty</p>
+            <ul class="text-left space-y-3 mb-8">
+              <li class="check-item"><div class="check-dot">✓</div>All club workshops &amp; seminars</li>
+              <li class="check-item"><div class="check-dot">✓</div>Hands-on activities &amp; quizzes</li>
+              <li class="check-item"><div class="check-dot">✓</div>Industrial visits &amp; site tours</li>
+              <li class="check-item"><div class="check-dot">✓</div>Networking with peers &amp; professionals</li>
+              <li class="check-item"><div class="check-dot">✓</div>Research presentation opportunities</li>
+              <li class="check-item"><div class="check-dot">✓</div>Career exploration sessions</li>
+            </ul>
+            <a href="https://login.marwadiuniversity.ac.in" target="_blank" rel="noopener"
+               class="btn-p w-full justify-center text-base py-3.5 block">
+              Register Now
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <p class="text-xs mt-4" style="color:var(--tx-m);">Submit fees at Cabin MA557 · Dr. Aditya Saxena</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <footer class="py-14 px-5 md:px-8 border-t" style="border-color:var(--border);background:var(--card);backdrop-filter:blur(18px);">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row justify-between items-start gap-10 mb-10">
+        <div class="max-w-xs">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--accent);color:#001f0e;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M4 3c0 0 5 2 8 5s8 5 8 8"/>
+                <path d="M20 3c0 0-5 2-8 5s-8 5-8 8"/>
+              </svg>
+            </div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--tx);">Genomics Club</div>
+          </div>
+          <p class="text-sm leading-relaxed" style="color:var(--tx-m);">
+            Department of Bioinformatics<br>Faculty of Engineering and Technology<br>Marwadi University, Rajkot, Gujarat.
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-12">
+          <div>
+            <div class="text-xs font-bold tracking-widest uppercase mb-4"
+                 style="color:var(--accent);font-family:'JetBrains Mono',monospace;">Navigation</div>
+            <div class="space-y-2">
+              <a href="#home"       class="nav-link block text-sm">Home</a>
+              <a href="#about"      class="nav-link block text-sm">About</a>
+              <a href="#activities" class="nav-link block text-sm">Activities</a>
+              <a href="#benefits"   class="nav-link block text-sm">Benefits</a>
+              <a href="#team"       class="nav-link block text-sm">Team</a>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs font-bold tracking-widest uppercase mb-4"
+                 style="color:var(--accent);font-family:'JetBrains Mono',monospace;">Contact</div>
+            <div class="space-y-2 text-sm" style="color:var(--tx-m);">
+              <div>Cabin MA557 · Ext. 1568</div>
+              <div>Dr. Aditya Saxena</div>
+              <a href="mailto:aditya.saxena@marwadieducation.edu.in"
+                 class="text-xs hover:underline block" style="color:var(--accent);">
+                aditya.saxena@<br>marwadieducation.edu.in
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4"
+           style="border-color:var(--border);">
+        <p class="text-xs" style="color:var(--tx-m);">© 2026 Genomics Club · Marwadi University. All rights reserved.</p>
+
+        <!-- ✅ CHANGE 11: "Made by" with Gengar outline SVG -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs" style="color:var(--tx-m);font-family:'JetBrains Mono',monospace;">Made by</span>
+          <!-- Gengar silhouette (border/outline only, no fill) -->
+          <svg class="gengar-logo" width="34" height="34" viewBox="0 0 120 120"
+               fill="none" stroke="currentColor" stroke-width="3.5"
+               stroke-linecap="round" stroke-linejoin="round"
+               style="color:var(--accent);">
+            <!-- Body -->
+            <path d="M60 95 C30 95 15 78 15 60 C15 35 30 15 60 15 C90 15 105 35 105 60 C105 78 90 95 60 95 Z"/>
+            <!-- Spiky bottom / feet -->
+            <path d="M22 85 L15 100 L28 92 L35 108 L44 90 L55 105 L60 88 L65 105 L76 90 L85 108 L92 92 L105 100 L98 85"/>
+            <!-- Left eye -->
+            <ellipse cx="44" cy="52" rx="8" ry="9"/>
+            <circle cx="47" cy="52" r="3" fill="currentColor"/>
+            <!-- Right eye -->
+            <ellipse cx="76" cy="52" rx="8" ry="9"/>
+            <circle cx="79" cy="52" r="3" fill="currentColor"/>
+            <!-- Mouth / fangs -->
+            <path d="M46 70 Q60 80 74 70"/>
+            <path d="M52 70 L49 78"/>
+            <path d="M68 70 L71 78"/>
+            <!-- Ears / horns -->
+            <path d="M30 30 L20 10 L38 24"/>
+            <path d="M90 30 L100 10 L82 24"/>
+            <!-- Ghost tail suggestion -->
+            <path d="M60 95 Q55 105 60 112 Q65 105 60 95" opacity=".5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to top -->
+  <button id="btt" class="fixed bottom-8 right-8 z-40 w-12 h-12 rounded-2xl flex items-center justify-center glass"
+          style="color:var(--accent);font-size:1.2rem;" aria-label="Back to top">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
+
+  <!-- ── External JS files (order matters) ── -->
+  <script src="js/data.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/gsap-animations.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- Boot canvases after DOM ready -->
+  <script>
+    window.addEventListener('load', () => {
+      if (window.drawDNA)   window.drawDNA()
+      if (window.drawHelix) window.drawHelix()
+    })
+  </script>
+</body>
+</html>

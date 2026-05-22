@@ -1,0 +1,60 @@
+/* ═══════════════════════════════════════════════════
+   css/variables.css  –  Design tokens & base reset
+   ═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ─── Light theme ─── */
+:root {
+  --bg:         #f0fff8;
+  --bg2:        #f0fff8;          /* ← same as --bg (no alternating tone) */
+  --card:       rgba(255,255,255,0.55);
+  --card-hov:   rgba(255,255,255,0.82);
+  --border:     rgba(0,180,100,0.2);
+  --border-hov: rgba(0,180,100,0.55);
+  --tx:         #011a0c;
+  --tx-m:       #2e6b45;
+  --accent:     #00b864;
+  --accent2:    #009950;
+  --glow:       rgba(0,184,100,0.22);
+  --blur:       22px;
+  --sh:         0 8px 36px rgba(0,184,100,0.10);
+  --sh-hov:     0 22px 64px rgba(0,184,100,0.22);
+}
+
+/* ─── Dark theme ─── */
+.dark {
+  --bg:         #020e07;
+  --bg2:        #020e07;          /* ← same as --bg */
+  --card:       rgba(3,18,10,0.62);
+  --card-hov:   rgba(5,26,14,0.88);
+  --border:     rgba(0,232,130,0.14);
+  --border-hov: rgba(0,232,130,0.48);
+  --tx:         #e4fff1;
+  --tx-m:       #5aaa7a;
+  --accent:     #00e882;
+  --accent2:    #00c46e;
+  --glow:       rgba(0,232,130,0.18);
+  --sh:         0 8px 36px rgba(0,0,0,0.55);
+  --sh-hov:     0 22px 64px rgba(0,232,130,0.18);
+}
+
+/* ─── Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  transition: background 0.45s, color 0.45s;
+  overflow-x: hidden;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 99px; }
+
+/* ─── Selection ─── */
+::selection { background: rgba(0,232,130,0.25); color: var(--tx); }

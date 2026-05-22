@@ -1,0 +1,67 @@
+/* ═══════════════════════════════════════════════════
+   css/animations.css  –  Keyframes & transitions
+   ═══════════════════════════════════════════════════ */
+
+/* ── Floating ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-16px); }
+}
+.float { animation: float 6s ease-in-out infinite; }
+
+/* ── Pulse glow ── */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--glow); }
+  50%       { box-shadow: 0 0 30px 8px var(--glow); }
+}
+.pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
+
+/* ── Scroll bounce indicator ── */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(8px); }
+}
+.bounce { animation: bounce 2s ease-in-out infinite; }
+
+/* ── Fade in up ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Spin slow ── */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spin-slow { animation: spinSlow 18s linear infinite; }
+
+/* ── Card hover lift (override glass defaults with spring feel) ── */
+.card-lift {
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, border-color .3s ease;
+}
+.card-lift:hover { transform: translateY(-6px) scale(1.01); }
+
+/* ── Gradient border animation ── */
+@keyframes borderRotate {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+.grad-border {
+  background: linear-gradient(90deg, var(--accent), #00ffaa, var(--accent2), var(--accent));
+  background-size: 300% 300%;
+  animation: borderRotate 4s linear infinite;
+  padding: 1px; border-radius: 16px;
+}
+
+/* ── Underline slide in (for active nav) ── */
+@keyframes underlineIn {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+/* ── DNA strand ── */
+@keyframes dnaScroll {
+  from { stroke-dashoffset: 1000; }
+  to   { stroke-dashoffset: 0; }
+}
