@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   js/main.js  –  App bootstrap & UI logic
+   js/main.js  –  App bootstrap & UI logic  (v2)
    ═══════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const actGrid = document.getElementById('act-grid')
   if (actGrid) {
     actGrid.innerHTML = D.activities.map((a, i) => `
-      <div class="glass rounded-2xl p-6 relative overflow-hidden rv-scale tilt-card card-lift"
+      <div class="glass rounded-2xl p-6 relative overflow-hidden rv-scale"
            style="transition-delay:${(i % 4) * .07}s; cursor:default;">
         <span class="act-n">${a.n}</span>
         <div class="icon-wrap w-11 h-11 rounded-xl flex items-center justify-center mb-4"
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const benGrid = document.getElementById('ben-grid')
   if (benGrid) {
     benGrid.innerHTML = D.benefits.map((b, i) => `
-      <div class="glass rounded-2xl p-6 rv-scale tilt-card card-lift"
+      <div class="glass rounded-2xl p-6 rv-scale"
            style="transition-delay:${(i % 3) * .08}s;">
         <div class="flex items-center gap-3 mb-3">
           <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0"
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const teamGrid = document.getElementById('team-grid')
   if (teamGrid) {
     teamGrid.innerHTML = D.team.map((m, i) => `
-      <div class="glass rounded-2xl p-5 text-center rv-scale tilt-card card-lift"
+      <div class="glass rounded-2xl p-5 text-center rv-scale"
            style="transition-delay:${i * .07}s;">
         <div class="avatar" style="background:${m.g};">${m.i}</div>
         <h3 class="font-bold text-sm leading-tight"
@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (tt) {
     tt.addEventListener('click', () => {
       html.classList.toggle('dark')
+      // Restart canvases so colours update immediately
       if (window.drawDNA)   window.drawDNA()
       if (window.drawHelix) window.drawHelix()
     })
@@ -77,37 +78,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const mm = document.getElementById('mm')
   if (hb && mm) {
     hb.addEventListener('click', () => {
-      mm.classList.toggle('hidden')
-      mm.classList.toggle('flex')
+      const isOpen = !mm.classList.contains('hidden')
+      if (isOpen) {
+        mm.classList.add('hidden'); mm.classList.remove('flex')
+      } else {
+        mm.classList.remove('hidden'); mm.classList.add('flex')
+      }
     })
+    // Close on link click
     mm.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
       mm.classList.add('hidden'); mm.classList.remove('flex')
     }))
   }
 
   /* ════════════════════════════════
-     4. ACTIVE NAV HIGHLIGHT ON SCROLL
+     4. ACTIVE NAV HIGHLIGHT (scroll-spy)
   ════════════════════════════════ */
-  const sections = ['home','about','science','activities','benefits','team','join']
-  const navLinks = document.querySelectorAll('.nav-link[data-section]')
+  const sections  = ['home','about','science','activities','benefits','team','join']
+  const navLinks  = document.querySelectorAll('.nav-link[data-section]')
 
-  const observerOptions = {
-    root: null,
-    rootMargin: '-40% 0px -55% 0px',
-    threshold: 0
-  }
-
-  const observer = new IntersectionObserver((entries) => {
+  const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const id = entry.target.id
         navLinks.forEach(link => {
-          link.classList.remove('active')
-          if (link.dataset.section === id) link.classList.add('active')
+          link.classList.toggle('active', link.dataset.section === id)
         })
       }
     })
-  }, observerOptions)
+  }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 })
 
   sections.forEach(id => {
     const el = document.getElementById(id)
@@ -115,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   /* ════════════════════════════════
-     5. BACK TO TOP
+     5. BACK TO TOP (circle)
   ════════════════════════════════ */
   const btt = document.getElementById('btt')
   if (btt) {
@@ -131,43 +130,70 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.matchMedia('(pointer:fine)').matches) {
     const cg = document.getElementById('cursor-glow')
     if (cg) {
-      let mx = 0, my = 0, cx = 0, cy = 0
+      let mx = 0, my = 0, cx2 = 0, cy2 = 0
       window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY })
       ;(function animCursor() {
-        cx += (mx - cx) * .08; cy += (my - cy) * .08
-        cg.style.left = cx + 'px'; cg.style.top = cy + 'px'
+        cx2 += (mx - cx2) * .08; cy2 += (my - cy2) * .08
+        cg.style.left = cx2 + 'px'; cg.style.top = cy2 + 'px'
         requestAnimationFrame(animCursor)
       })()
     }
   }
 
   /* ════════════════════════════════
-     7. CARD TILT (3D hover)
+     7. CARD HOVER — tilt + lift
+        Fixed: only apply to non-mobile, prevent conflicts
   ════════════════════════════════ */
-  document.querySelectorAll('.tilt-card').forEach(card => {
-    card.addEventListener('mousemove', e => {
-      const r = card.getBoundingClientRect()
-      const x = ((e.clientX - r.left) / r.width  - .5) * 10
-      const y = ((e.clientY - r.top)  / r.height - .5) * 10
-      card.style.transform  = `translateY(-5px) perspective(800px) rotateX(${-y}deg) rotateY(${x}deg)`
-      card.style.transition = 'transform .08s ease'
+  if (window.matchMedia('(pointer:fine)').matches) {
+    document.querySelectorAll('.glass').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.willChange = 'transform'
+      })
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect()
+        const x = ((e.clientX - r.left) / r.width  - .5) * 8
+        const y = ((e.clientY - r.top)  / r.height - .5) * 8
+        card.style.transform  = `translateY(-5px) perspective(900px) rotateX(${-y}deg) rotateY(${x}deg)`
+        card.style.transition = 'transform .08s linear'
+      })
+      card.addEventListener('mouseleave', () => {
+        card.style.transform  = ''
+        card.style.transition = 'background .3s, border-color .3s, box-shadow .3s, transform .4s cubic-bezier(.34,1.56,.64,1)'
+        card.style.willChange = ''
+      })
     })
-    card.addEventListener('mouseleave', () => {
-      card.style.transform  = ''
-      card.style.transition = 'transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, border-color .3s ease'
-    })
-  })
+  }
 
   /* ════════════════════════════════
      8. NAV SHRINK ON SCROLL
   ════════════════════════════════ */
   const navbar = document.getElementById('navbar')
-  window.addEventListener('scroll', () => {
-    if (navbar) navbar.classList.toggle('py-2', window.scrollY > 60)
-  })
+  if (navbar) {
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60)
+    })
+  }
 
   /* ════════════════════════════════
-     9. INIT GSAP AFTER CONTENT READY
+     9. COUNTERS — show immediately on load (no scroll trigger)
+  ════════════════════════════════ */
+  function runCounters() {
+    document.querySelectorAll('.stat-n[data-target]').forEach(el => {
+      const target = +el.dataset.target
+      let current = 0
+      const step = target / 40
+      const timer = setInterval(() => {
+        current = Math.min(current + step, target)
+        el.textContent = Math.round(current) + '+'
+        if (current >= target) clearInterval(timer)
+      }, 30)
+    })
+  }
+  // Run counters immediately after a tiny delay so they animate on page load
+  setTimeout(runCounters, 400)
+
+  /* ════════════════════════════════
+     10. GSAP SCROLL REVEALS
   ════════════════════════════════ */
   if (window.initGSAP) window.initGSAP()
 
